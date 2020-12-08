@@ -1,6 +1,5 @@
 # Nuk_WIFI_AutoLogin
-###An APP design for auto login dormitory wifi in NUK
-***
+### An APP design for auto login dormitory wifi in NUK
 For now, **this release only support auto login OA_2F WIFI**.
 In future I'll make an advance setting for more different WIFI names.
 Since I cannot go all the college to collect the WIFI informations,
