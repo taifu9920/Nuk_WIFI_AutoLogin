@@ -10,7 +10,7 @@ public class StopProcess extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("RMH", "Triggered");
-        Intent it = (Intent)intent.getExtras().get("service");
+        Intent it = (Intent) intent.getExtras().get("service");
         if (it != null) context.stopService(it);
         else Log.e("RMH", "it is null!");
     }

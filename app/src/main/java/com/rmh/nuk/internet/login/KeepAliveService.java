@@ -23,12 +23,17 @@ public class KeepAliveService extends Service {
     BroadcastReceiver wifiswitch = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(WifiManager.WIFI_STATE_CHANGED_ACTION)){
-                if (intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1) == WifiManager.WIFI_STATE_DISABLED){
+            if (intent.getAction().equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
+                if (intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1) == WifiManager.WIFI_STATE_DISABLED) {
                     Log.d("RMH", "Disabled");
                     unregisterReceiver(event);
-                }else if (intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1) == WifiManager.WIFI_STATE_ENABLED){
+                } else if (intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1) == WifiManager.WIFI_STATE_ENABLED) {
                     Log.d("RMH", "Enabled");
+                    try {
+                        unregisterReceiver(event);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     event = new wifiChanged();
                     registerReceiver(event, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
                 }
@@ -46,14 +51,23 @@ public class KeepAliveService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.d("RMH", "Service started");
+        event = new wifiChanged();
+        registerReceiver(event, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
+        registerReceiver(wifiswitch, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d("RMH", "Destroyed");
-        unregisterReceiver(event);
-        unregisterReceiver(wifiswitch);
+        try {
+            unregisterReceiver(event);
+        } catch (RuntimeException ignored) {
+        }
+        try {
+            unregisterReceiver(wifiswitch);
+        } catch (RuntimeException ignored) {
+        }
         sendBroadcast(new Intent("com.rmh.nuk.internet.login.action.close"));
         stopForeground(true);
         stopSelf();
@@ -61,6 +75,7 @@ public class KeepAliveService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d("RMH", "Service onstartcommand");
         Context context = this;
         Log.d("RMH", "Create Notification");
         Intent ri = new Intent(context, LoginActivity.class);
@@ -79,10 +94,6 @@ public class KeepAliveService extends Service {
                 .addAction(nca)
                 .build();
         startForeground(1, notification);
-
-        event = new wifiChanged();
-        registerReceiver(event, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
-        registerReceiver(wifiswitch, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
-        return START_REDELIVER_INTENT;
+        return START_NOT_STICKY;
     }
 }
