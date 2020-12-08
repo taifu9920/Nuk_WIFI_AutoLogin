@@ -58,6 +58,8 @@ public class WifiLogin extends AsyncTask<Object, Integer, String> {
                     result = "Did not work!";
                 }
                 Log.d("RMH", result);
+                inputStream.close();
+                conn.disconnect();
                 return result;
             }
         }catch (MalformedURLException e) {

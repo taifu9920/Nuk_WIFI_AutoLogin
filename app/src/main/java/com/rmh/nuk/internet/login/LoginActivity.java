@@ -5,12 +5,15 @@ import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,16 +25,30 @@ import androidx.core.app.ActivityCompat;
 import com.rmh.nuk.internet.R;
 
 public class LoginActivity extends AppCompatActivity {
+    BroadcastReceiver receiveclose = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            finish();
+        }
+    };
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        this.finish();
+        unregisterReceiver(receiveclose);
+        Log.d("RMH", "Activity Destroyed");
     }
 
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        
+    }
+
+    private boolean isMyServiceRunning() {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
+            if (KeepAliveService.class.getName().equals(service.service.getClassName())) {
                 return true;
             }
         }
@@ -77,7 +94,8 @@ public class LoginActivity extends AppCompatActivity {
         KeepAliveChannel.setDescription("KeepAlive");
         nm.createNotificationChannel(KeepAliveChannel);
 
-        Intent intent = new Intent(this, KeepAliveService.class);
-        if (!isMyServiceRunning(KeepAliveService.class)) startService(intent);
+        Intent intent = new Intent(getApplication(), KeepAliveService.class);
+        if (!isMyServiceRunning()) startService(intent);
+        registerReceiver(receiveclose, new IntentFilter("com.rmh.nuk.internet.login.action.close"));
     }
 }

@@ -14,12 +14,13 @@ import android.util.Log;
 public class wifiChanged extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("RMH", "Received");
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         Network Wifi = null;
-        for(Network n : cm.getAllNetworks()){ if (cm.getNetworkInfo(n).getTypeName().equals("WIFI")) Wifi = n; Log.d("RMH", cm.getNetworkInfo(n).getState().toString()); }
+        for(Network n : cm.getAllNetworks()){ if (cm.getNetworkInfo(n) != null && cm.getNetworkInfo(n).getTypeName().equals("WIFI")) Wifi = n; }
         cm.bindProcessToNetwork(Wifi != null ? Wifi : cm.getActiveNetwork());
         if(Wifi != null && cm.getNetworkInfo(Wifi).getState().equals(NetworkInfo.State.CONNECTED)) {
+            Log.d("RMH", "Received");
+            Log.d("RMH", cm.getNetworkInfo(Wifi).toString());
             WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
             WifiInfo wifiInfo = wifiManager.getConnectionInfo();
             String ssid = wifiInfo.getSSID();
